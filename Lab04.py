@@ -345,7 +345,7 @@ def main():
         # it looks like for your diffusion function you don't have climate_shift parameters, maybe consider add it
         # to produce the diffusion figure with climate shift
         plot_diffusion(f'global_warming_Heat_map_{shift}.png', 100, 73000, 0.25, c2=2.5e-7, permafrost=True)
-        #
+        # Using the shift to produce corresponding temperature profile under global warming
         plot_temp_profiles(f'global_warming_Temp_Profile_{shift}.png', climate_shift=shift)
 
 
