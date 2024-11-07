@@ -137,7 +137,7 @@ def heat_diff_solve(xmax, tmax, dx, dt, c2=1, permafrost=False, climate_shift=0)
 ##############################
 
 
-def plot_diffusion(xmax, tmax, dx, dt, c2=1, permafrost=False, hline=False, print_U=False):
+def plot_diffusion(figure_name, xmax, tmax, dx, dt, c2=1, permafrost=False, hline=False, print_U=False):
     '''The function will plot the U array from heat_diff_solve() in a heatmap to see how the ground
     temperature profile evolves from initial conditions due to diffusion over time.
 
@@ -210,12 +210,12 @@ def plot_diffusion(xmax, tmax, dx, dt, c2=1, permafrost=False, hline=False, prin
     ax.tick_params(labelsize=14)  # modify size of tick and colorbar labels
     cbar.ax.tick_params(labelsize=14)
     # the plot is not showing up on my end, so I added the line below to save the plot
-    fig.savefig('diffusion.png')
+    fig.savefig(figure_name)
 
 ##############################
 
 
-def plot_temp_profiles(xmax=100, tmax=73000, dx=0.25, dt=1, climate_shift=0):
+def plot_temp_profiles(figure_name, xmax=100, tmax=73000, dx=0.25, dt=1, climate_shift=0):
     ''' This function will plot peak winter and summer ground temperature profiles when modeling
     permafrost heat diffusion. Default is after 200 years of diffusion in an approximate steady-state.
     It uses data from the U array calculated for Greenland in heat_diff_solve()
@@ -306,7 +306,44 @@ def plot_temp_profiles(xmax=100, tmax=73000, dx=0.25, dt=1, climate_shift=0):
         ax.set_title("Summer and Winter Ground Temperatures at Kangerlussuaq, Greenland. "
                      f"{climate_shift}\u00B0C Climate Shift",
                      fontsize=16)
+    fig.savefig(figure_name)
 
 
-# plotting out he wire example and print the heat matrix
-plot_diffusion(1, 0.2, 0.2, 0.02, 1, print_U=True)
+def test_part1(heat):
+    sol = np.array([[0.,       0.,      0.,      0.,       0.,       0.,       0.,       0.,       0.,       0.,       0.],
+                    [0.64,     0.48,     0.4,      0.32,     0.26,     0.21,
+                        0.17,     0.1375,   0.11125,  0.09,     0.072813],
+                    [0.96,     0.8,      0.64,     0.52,     0.42,     0.34,
+                        0.275,    0.2225,   0.18,     0.145625, 0.117813],
+                    [0.96,     0.8,      0.64,     0.52,     0.42,     0.34,
+                        0.275,    0.2225,   0.18,     0.145625, 0.117813],
+                    [0.64,     0.48,     0.4,      0.32,     0.26,     0.21,
+                        0.17,     0.1375,   0.11125,  0.09,     0.072813],
+                    [0.,       0.,       0.,       0.,       0.,       0.,       0.,       0.,       0.,       0.,       0.]])
+    if np.sum(heat-sol) < 1e-16:
+        print('Part 1 PASSED TEST')
+    else:
+        print('Part 1 FAILED TEST')
+
+
+def main():
+    # plotting out he wire example and print the heat matrix
+    _, _, heat = heat_diff_solve(1, 0.2, 0.2, 0.02, 1)
+    test_part1(heat)
+    plot_diffusion(1, 0.2, 0.2, 0.02, 1, print_U=True)
+    # plotting out the steady state heat map and temp profile, please set the c2 correctly, because I don't
+    # have access to your report, and there's no information about how you set the parameters
+    plot_diffusion('Steady-State_Heat_map.png', 100, 73000, 0.25, c2=2.5e-7, permafrost=True)
+    plot_temp_profiles('Steady-State_Temp_Profile.png')
+    temp_shift = [0.5, 1, 3]
+    # The loop below loops through the temperature shift defined above, and plots out all the figures
+    for shift in temp_shift:
+        # it looks like for your diffusion function you don't have climate_shift parameters, maybe consider add it
+        # to produce the diffusion figure with climate shift
+        plot_diffusion(f'global_warming_Heat_map_{shift}.png', 100, 73000, 0.25, c2=2.5e-7, permafrost=True)
+        #
+        plot_temp_profiles(f'global_warming_Temp_Profile_{shift}.png', climate_shift=shift)
+
+
+if __name__ == '__main__':
+    main()
