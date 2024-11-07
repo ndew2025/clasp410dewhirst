@@ -310,6 +310,14 @@ def plot_temp_profiles(figure_name, xmax=100, tmax=73000, dx=0.25, dt=1, climate
 
 
 def test_part1(heat):
+    ''' This function test if your heat matrix in part 1 is the same as the solution 
+    posted on Canvas.
+
+    PARAMETERS
+    ----------
+    heat: np.array
+        Your heat matrix from heat_diff_solve
+    '''
     sol = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
                     [0.64, 0.48, 0.4, 0.32, 0.26, 0.21, 0.17, 0.1375, 0.11125, 0.09, 0.072813],
                     [0.96, 0.8, 0.64, 0.52, 0.42, 0.34, 0.275, 0.2225, 0.18, 0.145625, 0.117813],
