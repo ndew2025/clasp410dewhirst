@@ -136,6 +136,8 @@ def heat_diff_solve(xmax, tmax, dx, dt, c2=1, permafrost=False, climate_shift=0)
 
 ##############################
 
+# Added figure_name parameter which specifies the name of the figure to save
+
 
 def plot_diffusion(figure_name, xmax, tmax, dx, dt, c2=1, permafrost=False, hline=False, print_U=False):
     '''The function will plot the U array from heat_diff_solve() in a heatmap to see how the ground
@@ -213,6 +215,8 @@ def plot_diffusion(figure_name, xmax, tmax, dx, dt, c2=1, permafrost=False, hlin
     fig.savefig(figure_name)
 
 ##############################
+
+# Added figure_name parameter which specifies the name of the figure to save
 
 
 def plot_temp_profiles(figure_name, xmax=100, tmax=73000, dx=0.25, dt=1, climate_shift=0):
@@ -337,6 +341,7 @@ def main():
     plot_diffusion(1, 0.2, 0.2, 0.02, 1, print_U=True)
     # plotting out the steady state heat map and temp profile, please set the c2 correctly, because I don't
     # have access to your report, and there's no information about how you set the parameters
+    # TODO: Set all the parameters for your functions correctly
     plot_diffusion('Steady-State_Heat_map.png', 100, 73000, 0.25, c2=2.5e-7, permafrost=True)
     plot_temp_profiles('Steady-State_Temp_Profile.png')
     temp_shift = [0.5, 1, 3]
