@@ -64,7 +64,7 @@ def temp_warm(lats_in):
     temp = coeffs[2] + coeffs[1]*lats_in + coeffs[0] * lats_in**2
     return temp
 
-def snowball_earth(nBins=18, dt=1, tmax = 10000, thermal_diff = 100., debug = False):
+def snowball_earth(nBins=18, dt=1, tmax = 10000, thermal_diff = 100., sphere_corr = True, debug = False):
     '''Solve the snowball earth problem
     
     PARAMETERS
@@ -89,7 +89,7 @@ def snowball_earth(nBins=18, dt=1, tmax = 10000, thermal_diff = 100., debug = Fa
     # Create L matrix = I - lamda*dt*A (it never changes, only have to do it once)
     # Implicitly solve for the temperature one step forward in time for maxtime/tstep
 
-    thermal_diff_yr = 100*3600*24*365 #m^2/yr
+    thermal_diff_yr = thermal_diff*3600*24*365 #m^2/yr
 
     dlat, lats = grid_generator(nBins = nBins)
 
@@ -107,7 +107,7 @@ def snowball_earth(nBins=18, dt=1, tmax = 10000, thermal_diff = 100., debug = Fa
         print("Resulting lat grid:")
         print(lats)
 
-    # Create A matrix
+    # Create A matrix for temperature diffusion
     I = np.identity(nBins)
     A = I*-2 # Gets diagonal to be -2
     A[np.arange(nBins-1), np.arange(nBins-1) + 1] = 1 # These lines set the off diagonal elements = 1
@@ -115,6 +115,19 @@ def snowball_earth(nBins=18, dt=1, tmax = 10000, thermal_diff = 100., debug = Fa
 
     A[0, 1], A[-1, -2] = 2, 2 # Set the other remaining bins that aren't zero to 2
     A *= dy**-2
+
+    # Create B matrix for spherical correction term
+    B = np.zeros((nBins, nBins)) # Gets diagonal to be -2
+    B[np.arange(nBins-1), np.arange(nBins-1) + 1] = 1 # These lines set the off diagonal elements = 1
+    B[np.arange(nBins-1) + 1, np.arange(nBins-1) ] = -1
+
+    # Set boundary conditions in B
+    B[0, :] = 0
+    B[-1, :] = 0
+
+    # Area of onion ring latitude band as a function of latitude (max at equator, 0 at poles)
+    Axz = np.pi((radearth+50)**2 + radearth**2)*np.sin(np.pi/180*lats)
+    dAxz = np.matmul(B, Axz) / (Axz*4*dy**2)
 
     if debug:
         print(f'A = {A}')
@@ -125,11 +138,14 @@ def snowball_earth(nBins=18, dt=1, tmax = 10000, thermal_diff = 100., debug = Fa
     L_inv = np.linalg.inv(L)
 
     for i in range(nStep):
+        # Add spherical correction term
+        if sphere_corr:
+            Temp += dt*thermal_diff_yr*dAxz
         Temp = np.matmul(L_inv, Temp)
     
     return lats, Temp
 
-def test_snowball(nBins = 18):
+def test_snowball(nBins = 18, sphere_corr = True):
     '''Reproduce example plot in lecture/handout. 
     
     Using out default values and a warm earth initial condition, plot the initial conditions,
@@ -138,7 +154,8 @@ def test_snowball(nBins = 18):
 
     dlat, lats = grid_generator(nBins)
     initial_temps = temp_warm(lats)
-    lats, temp_diff = snowball_earth()
+    lats, temp_diff = snowball_earth(sphere_corr = False)
+    lats, temp_diff_spherical = snowball_earth(sphere_corr = True)
 
     fig, ax = plt.subplots(1, 1, figsize = (10,10))
     ax.plot(lats, initial_temps, lw = 3, label = "Initial Temperatures")
